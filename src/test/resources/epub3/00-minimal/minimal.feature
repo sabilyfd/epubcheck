@@ -9,16 +9,19 @@
     And EPUBCheck with default settings
 
 
+  @spec @xref:sec-metadata-elem @xref:sec-opf-dcidentifier @xref:sec-opf-dclanguage @xref:sec-opf-dcmes-optional-def
   Scenario: Verify a minimal EPUB
     When checking EPUB 'minimal'
     Then no errors or warnings are reported
-    
+  
+  @spec @xref:sec-epub-conf
   Scenario: Verify a minimal packaged EPUB
     When checking EPUB 'minimal.epub'
     Then no errors or warnings are reported
 
 	# FIXME the current API doesn’t allow the version to be explicitly set
 	# PKG-001 should either be removed, or made a fatal error
+
   Scenario: Report when checking an EPUB 3 explicitly against EPUB 2.0.1
     Given EPUBCheck configured to check EPUB 2 rules
     When checking EPUB 'minimal'

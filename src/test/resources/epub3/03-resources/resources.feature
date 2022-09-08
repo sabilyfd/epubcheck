@@ -114,7 +114,53 @@
     Then no errors or warnings are reported
     
 
-  ### 3.5.2.2 HTML img fallbacks
+  ## 3.5 Resource fallbacks
+  
+  ### 3.5.1 Manifest fallbacks
+  
+  @spec @xref:sec-manifest-fallbacks
+  Scenario: Allow non-CMT file to be in the spine if they have an XHTML Content Document fallback
+    Note: here an audio file is used in the spine
+    When checking file 'fallback-to-xhtml-valid.opf'
+    Then no errors or warnings are reported
+    
+  @spec @xref:sec-manifest-fallbacks
+  Scenario: Allow an SVG Content Document to be used as a fallback
+    Note: here an image file is used in the spine
+    When checking file 'fallback-to-svg-valid.opf'
+    Then no errors or warnings are reported
+    
+  @spec @xref:sec-manifest-fallbacks
+  Scenario: Allow a deep fallback chain as long as it contains a Content Document
+    Note: here a font file is used in the spine
+    When checking file 'fallback-chain-valid.opf'
+    Then no errors or warnings are reported
+
+  @spec @xref:sec-manifest-fallbacks
+  Scenario: Report a cycle in the fallback chain
+    When checking file 'fallback-cycle-error.opf'
+    Then error OPF-045 is reported (circular reference)
+    And error OPF-044 is reported (no Content Document fallback was found) 
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-manifest-fallbacks
+  Scenario: Report files that aren't Content Documents (like audio) in spine when they don't have a fallback  
+    Note: here an audio file is used in the spine
+    When checking file 'fallback-missing-error.opf'
+    Then error OPF-043 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-manifest-fallbacks
+  Scenario: Report a circular manifest fallback chain
+    When checking EPUB 'resources-manifest-fallback-circular-error'
+    Then error OPF-045 is reported 4 times
+    And error MED-003 is reported
+    And no other errors or warnings are reported
+
+
+  ### 3.5.2 Intrinsic fallbacks
+  
+  #### 3.5.2.2 HTML img fallbacks
   
   @spec @xref:sec-fallbacks-img
   Scenario: Report a `picture` element with a foreign resource in its `img src` fallback  
@@ -148,14 +194,12 @@
 
   ## 3.6 Resources Locations
   
-  @internal
   Scenario: remote XHTML document is not detected in single-document mode
   	Remote resources checks depend on publication-wide validation
     (e.g. to check if the resource is used a font)
     When checking file 'resources-remote-xhtml-error.opf'
     Then no errors or warnings are reported
     
-  @internal
   Scenario: remote SVG document is not detected in single-document mode
     Remote resources checks depend on publication-wide validation
     (e.g. to check if the resource is used a font)
@@ -300,59 +344,4 @@
   Scenario: Report a remote stylesheet
     When checking EPUB 'resources-remote-stylesheet-error'
     Then error RSC-006 is reported
-    And no other errors or warnings are reported
-
-
-  ### 5.6.1 The manifest element
-
-  @spec @xref:sec-manifest-elem
-  Scenario: Report a remote image declared in the package document when it is referenced from an HTML `a` element
-    When checking EPUB 'resources-remote-img-in-link-error'
-    Then error RSC-006 is reported
-    And no other errors or warnings are reported
-
-  @spec @xref:sec-manifest-elem
-  Scenario: Report remote audio resources not declared in the package document
-    When checking EPUB 'resources-remote-audio-undeclared-error'
-    Then error RSC-008 is reported
-    And error MED-002 is reported (side-effect error about the audio missing a fallback, since its type cannot be known from the OPF declaration)
-    And no other errors or warnings are reported
-
-  @spec @xref:sec-manifest-elem
-  Scenario: Report remote audio resources defined in `sources` elements but not declared in the package document
-    When checking EPUB 'resources-remote-audio-sources-undeclared-error'
-    Then error RSC-008 is reported
-    And no other errors or warnings are reported
-
-  @spec @xref:sec-manifest-elem
-  Scenario: Report a remote font not declared in the package document
-    When checking EPUB 'resources-remote-font-undeclared-error'
-    Then error RSC-008 is reported
-    And no other errors or warnings are reported
-  
-  
-  ### 5.6.2.1 Resource properties
-
-  @spec @xref:sec-item-resource-properties
-  Scenario: Report an XHTML document with remote audio but without the `remote-resources` property set in the package document
-    When checking EPUB 'resources-remote-audio-missing-property-error'
-    Then error OPF-014 is reported
-    And no other errors or warnings are reported
-
-  @spec @xref:sec-item-resource-properties
-  Scenario: Report remote fonts in CSS without the `remote-resource` property set in the package document
-    When checking EPUB 'resources-remote-font-in-css-missing-property-error'
-    Then error OPF-014 is reported
-    And no other errors or warnings are reported
-
-  @spec @xref:sec-item-resource-properties
-  Scenario: Report an SVG using remote fonts without the `remote-resource` property set in the package document
-    When checking EPUB 'resources-remote-font-in-svg-missing-property-error'
-    Then error OPF-014 is reported
-    And no other errors or warnings are reported
-
-  @spec @xref:sec-item-resource-properties
-  Scenario: Report an XHTML document using remote fonts in `style` without the `remote-resource` property set in the package document
-    When checking EPUB 'resources-remote-font-in-xhtml-missing-property-error'
-    Then error OPF-014 is reported
     And no other errors or warnings are reported

@@ -10,13 +10,13 @@ Feature: EPUB 3 ▸ Packages Document
     And EPUBCheck with default settings
 
 
-  ##  3. Package Document
+  ##  5. Package Document
 
   Scenario: Verify that the Package Document can have any extension
     When checking EPUB 'package-file-extension-unusual-valid'
     Then no errors or warnings are reported
 
-  # 3.2 Content Conformance
+  # 5.2 Content Conformance
 
   Scenario: the minimal Package Document is reported as valid 
     When checking file 'minimal.opf'
@@ -295,11 +295,63 @@ Feature: EPUB 3 ▸ Packages Document
     Then warning RSC-007w is reported
     And no other errors or warnings are reported
   
-  ### 3.4.4 Manifest
+  ### 5.6 Manifest section
   
-  #### 3.4.4.1 The manifest Element
+  ### 5.6.1 The manifest element
+
+  @spec @xref:sec-manifest-elem
+  Scenario: Report a remote image declared in the package document when it is referenced from an HTML `a` element
+    When checking EPUB 'package-remote-img-in-link-error'
+    Then error RSC-006 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-manifest-elem
+  Scenario: Report remote audio resources not declared in the package document
+    When checking EPUB 'package-remote-audio-undeclared-error'
+    Then error RSC-008 is reported
+    And error MED-002 is reported (side-effect error about the audio missing a fallback, since its type cannot be known from the OPF declaration)
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-manifest-elem
+  Scenario: Report remote audio resources defined in `sources` elements but not declared in the package document
+    When checking EPUB 'package-remote-audio-sources-undeclared-error'
+    Then error RSC-008 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-manifest-elem
+  Scenario: Report a remote font not declared in the package document
+    When checking EPUB 'package-remote-font-undeclared-error'
+    Then error RSC-008 is reported
+    And no other errors or warnings are reported
   
-  #### 3.4.4.2 The item Element
+  
+  ### 5.6.2.1 Resource properties
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report an XHTML document with remote audio but without the `remote-resources` property set in the package document
+    When checking EPUB 'package-remote-audio-missing-property-error'
+    Then error OPF-014 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report remote fonts in CSS without the `remote-resource` property set in the package document
+    When checking EPUB 'package-remote-font-in-css-missing-property-error'
+    Then error OPF-014 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report an SVG using remote fonts without the `remote-resource` property set in the package document
+    When checking EPUB 'package-remote-font-in-svg-missing-property-error'
+    Then error OPF-014 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report an XHTML document using remote fonts in `style` without the `remote-resource` property set in the package document
+    When checking EPUB 'package-remote-font-in-xhtml-missing-property-error'
+    Then error OPF-014 is reported
+    And no other errors or warnings are reported
+
+  #### 5.6.2 The item Element
   
   Scenario: a manifest item must declare a media type  
     When checking file 'item-media-type-missing-error.opf'
@@ -368,57 +420,16 @@ Feature: EPUB 3 ▸ Packages Document
     Then error RSC-001 is reported 3 times
     And no other errors or warnings are reported
   
-  #### 3.4.4.3 Manifest Fallbacks
-  
-  Scenario: Allow non-CMT file to be in the spine if they have an XHTML Content Document fallback
-    Note: here an audio file is used in the spine
-    When checking file 'fallback-to-xhtml-valid.opf'
-    Then no errors or warnings are reported
-    
-  Scenario: Allow an SVG Content Document to be used as a fallback
-    Note: here an image file is used in the spine
-    When checking file 'fallback-to-svg-valid.opf'
-    Then no errors or warnings are reported
-    
-  Scenario: Allow a deep fallback chain as long as it contains a Content Document
-    Note: here a font file is used in the spine
-    When checking file 'fallback-chain-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: Report a cycle in the fallback chain
-    When checking file 'fallback-cycle-error.opf'
-    Then error OPF-045 is reported (circular reference)
-    And error OPF-044 is reported (no Content Document fallback was found) 
-    And no other errors or warnings are reported
-
-  Scenario: Report files that aren’t Content Documents (like audio) in spine when they don’t have a fallback  
-    Note: here an audio file is used in the spine
-    When checking file 'fallback-missing-error.opf'
-    Then error OPF-043 is reported
-    And no other errors or warnings are reported
-    
-  Scenario: Manifest fallback must point to an existing item ID 
+  Scenario: fallback attribute must point to an existing item ID 
     When checking file 'fallback-to-unknown-id-error.opf'
     Then error RSC-005 is reported
     And the message contains 'must resolve to another manifest item'
     And no other errors or warnings are reported
     
-  Scenario: Manifest fallback must point to an existing item ID 
+  Scenario: fallback attribute must not reference its item ID 
     When checking file 'fallback-to-self-error.opf'
     Then error RSC-005 is reported
     And the message contains 'must resolve to another manifest item'
-    And no other errors or warnings are reported
-
-  Scenario: Report usage of the EPUB 2 'fallback-style' attribute
-    When checking file 'fallback-style-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'fallback-style'
-    And no other errors or warnings are reported
-
-  Scenario: Report a circular manifest fallback chain
-    When checking EPUB 'package-manifest-fallback-circular-error'
-    Then error OPF-045 is reported 4 times
-    And error MED-003 is reported
     And no other errors or warnings are reported
 
   Scenario: Report a manifest fallback that references a non-existent resource
@@ -426,6 +437,12 @@ Feature: EPUB 3 ▸ Packages Document
     Then error RSC-005 is reported
     And the message contains 'manifest item element fallback attribute must resolve to another manifest item'
     And error MED-003 is reported
+    And no other errors or warnings are reported
+    
+  Scenario: Report usage of the EPUB 2 'fallback-style' attribute
+    When checking file 'fallback-style-error.opf'
+    Then error RSC-005 is reported
+    And the message contains 'fallback-style'
     And no other errors or warnings are reported
 
   #### 3.4.4.4 The bindings Element
@@ -1099,7 +1116,7 @@ Feature: EPUB 3 ▸ Packages Document
     And no other errors or warnings are reported
 
   Scenario: Report a media overlay document with remote resources but missing the `remote-resources` property
-    When checking EPUB 'resources-remote-audio-in-overlays-missing-property-error'
+    When checking EPUB 'package-remote-audio-in-overlays-missing-property-error'
     Then error OPF-014 is reported
     And no other errors or warnings are reported
 

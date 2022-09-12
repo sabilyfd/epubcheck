@@ -1,4 +1,4 @@
- Feature: EPUB 3 â–¸ Minimal Publications
+ Feature: EPUB 3 — Minimal Publications
   
   Checks minimal publications against the EPUB 3.3 specification:
     https://www.w3.org/TR/epub-33/

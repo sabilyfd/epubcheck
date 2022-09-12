@@ -1,4 +1,4 @@
-Feature: EPUB 3 â–¸ Navigation Document
+Feature: EPUB 3 — Navigation Document
 
 
   Checks conformance to the "EPUB navigation document" section of the EPUB 3.3 specification:

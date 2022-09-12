@@ -1,4 +1,4 @@
-Feature: EPUB 3 â–¸ Open Container Format
+Feature: EPUB 3 — Open Container Format
 
 
   Checks conformance to the "Open Container Format (OCF)" section of the EPUB 3.3 specification:

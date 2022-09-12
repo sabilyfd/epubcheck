@@ -1,4 +1,4 @@
- Feature: EPUB 3 â–¸ External Identifiers
+ Feature: EPUB 3 — External Identifiers
 
 
   Checks conformance to the "Allowed external identifiers" section of the EPUB 3.3 specification:

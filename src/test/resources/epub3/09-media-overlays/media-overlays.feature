@@ -1,4 +1,4 @@
-Feature: EPUB 3 â–¸ Media Overlays
+Feature: EPUB 3 — Media Overlays
 
 
   Checks conformance to the "Media overlays" section of the EPUB 3.3 specification:

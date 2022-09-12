@@ -1,4 +1,4 @@
-Feature: EPUB 3 â–¸ Accessibility
+Feature: EPUB 3 — Accessibility
 
 
   Checks conformance to the "Accessibility" section of the EPUB 3.3 specification:

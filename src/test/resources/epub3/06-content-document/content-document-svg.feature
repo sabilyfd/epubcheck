@@ -1,4 +1,4 @@
-Feature: EPUB 3 â–¸ Content Documents â–¸ SVG
+Feature: EPUB 3 — Content Documents — SVG
 
 
   Checks conformance to the "SVG content documents" section of the EPUB 3.3 specification:

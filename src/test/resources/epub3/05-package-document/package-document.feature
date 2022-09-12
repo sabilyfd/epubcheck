@@ -1,4 +1,4 @@
-Feature: EPUB 3 ▸ Packages Document
+Feature: EPUB 3 � Packages Document
 
 
   Checks conformance to the "Package document" section of the EPUB 3.3 specification:
@@ -66,7 +66,7 @@ Feature: EPUB 3 ▸ Packages Document
     And error RSC-005 is reported (side effect: missing unique-identifier target) 
     And no other errors or warnings are reported
     
-  Scenario: the 'package' element’s 'metadata' child must be before the 'manifest' child  
+  Scenario: the 'package' element's 'metadata' child must be before the 'manifest' child  
     When checking file 'package-manifest-before-metadata-error.opf'
     Then error RSC-005 is reported
     And the message contains 'element "manifest" not allowed yet'
@@ -202,25 +202,25 @@ Feature: EPUB 3 ▸ Packages Document
   
   #### 3.4.3.4 The meta Element
   
-  Scenario: a metadata’s property name must be defined 
+  Scenario: a metadata's property name must be defined 
     When checking file 'metadata-meta-property-empty-error.opf'
     Then error RSC-005 is reported 2 times
     And the message contains 'value of attribute "property" is invalid' 
     And no other errors or warnings are reported
     
-  Scenario: a metadata’s property name must not be a list of values 
+  Scenario: a metadata's property name must not be a list of values 
     When checking file 'metadata-meta-property-list-error.opf'
     Then error RSC-005 is reported (value is not an NMTOKEN)
     Then error OPF-025 is reported
     And the message contains "only one value must be specified"
     And no other errors or warnings are reported
 
-  Scenario: a metadata’s property name must be well-formed
+  Scenario: a metadata's property name must be well-formed
     When checking file 'metadata-meta-property-malformed-error.opf'
     Then error OPF-026 is reported
     And no other errors or warnings are reported
     
-  Scenario: a metadata’s value must be defined 
+  Scenario: a metadata's value must be defined 
     When checking file 'metadata-meta-value-empty-error.opf'
     Then error RSC-005 is reported
     And the message contains "must be a string with length at least 1" 
@@ -326,6 +326,41 @@ Feature: EPUB 3 ▸ Packages Document
   
   
   ### 5.6.2.1 Resource properties
+  
+  Scenario: An unknown item property in the default vocab is reported
+    When checking file 'item-property-unknown-error.opf'
+    Then error OPF-027 is reported
+    And no errors or warnings are reported
+  
+  ## cover-image
+  
+  @spec @xref:sec-item-resource-properties
+  Scenario: The 'cover-image' item property must occur at most once 
+    When checking file 'item-property-cover-image-multiple-error.opf'
+    Then error RSC-005 is reported
+    And the message contains "cover-image"
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: The 'cover-image' item property must only be used on images 
+    When checking file 'item-property-cover-image-wrongtype-error.opf'
+    Then error OPF-012 is reported
+    And no other errors or warnings are reported
+  
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report an unknown manifest item property
+    When checking EPUB 'package-manifest-prop-unknown-error'
+    Then error OPF-027 is reported
+    And no other errors or warnings are reported
+
+  ###  mathml
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Verify content documents are identified as containing mathml
+    When checking EPUB 'package-mathml-valid'
+    Then no errors or warnings are reported    
+
+  ###  remote-resources
 
   @spec @xref:sec-item-resource-properties
   Scenario: Report an XHTML document with remote audio but without the `remote-resources` property set in the package document
@@ -350,6 +385,81 @@ Feature: EPUB 3 ▸ Packages Document
     When checking EPUB 'package-remote-font-in-xhtml-missing-property-error'
     Then error OPF-014 is reported
     And no other errors or warnings are reported
+  
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report the declaration of the `remote-resources` property when the content has no script
+    When checking EPUB 'package-manifest-prop-remote-resource-declared-but-unnecessary-error'
+    Then warning OPF-018 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report a reference a remote resource when the `remote-resources` property is not set in the manifest
+    When checking EPUB 'package-manifest-prop-remote-resource-undeclared-error'
+    Then error OPF-014 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report the incorrect use of the `remote-resources` property for a resource defined in an `object` `param` element (issue 249)
+    When checking EPUB 'package-manifest-prop-remote-resource-object-param-warning'
+    Then warning OPF-018 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report a media overlay document with remote resources but missing the `remote-resources` property
+    When checking EPUB 'package-remote-audio-in-overlays-missing-property-error'
+    Then error OPF-014 is reported
+    And no other errors or warnings are reported
+
+  ###  scripted
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report the declaration of the `scripted` property when the content has no script
+    When checking EPUB 'package-manifest-prop-scripted-declared-but-unnecessary-error'
+    Then error OPF-015 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report a scripted document without the `scripted` property declared in the package document
+    When checking EPUB 'package-manifest-prop-scripted-undeclared-error'
+    Then error OPF-014 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Verify that script data blocks do not require the `scripted` property to be defined in the manifest
+    When checking EPUB 'package-manifest-prop-scripted-not-required-for-script-data-block-valid'
+    Then no errors or warnings are reported
+
+  ###  svg
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report the declaration of the `svg` property when the content has no embedded SVG
+    When checking EPUB 'package-manifest-prop-svg-declared-but-unnecessary-error'
+    Then error OPF-015 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report references to embedded SVG when the `svg` property is not set in the manifest 
+    When checking EPUB 'package-manifest-prop-svg-undeclared-error'
+    Then error OPF-014 is reported 2 times
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report reference to an embedded SVG when the `svg` property is not set in the manifest (one reference is set properly)
+    When checking EPUB 'package-manifest-prop-svg-undeclared-partial-error'
+    Then error OPF-014 is reported
+    And no other errors or warnings are reported
+
+
+  ###  switch
+
+  @spec @xref:sec-item-resource-properties
+  Scenario: Report a content document without the `switch` property declared in the manifest
+    When checking EPUB 'package-manifest-prop-switch-not-declared-error'
+    Then error OPF-014 is reported
+    And warning RSC-017 is reported
+    And the message contains 'The "epub:switch" element is deprecated'
+    And no other errors or warnings are reported
+
 
   #### 5.6.2 The item Element
   
@@ -611,557 +721,3 @@ Feature: EPUB 3 ▸ Packages Document
   Scenario: The 'schema' prefix can be used in metadata properties without being declared
     When checking file 'property-prefix-schema-not-declared-valid.opf'
     Then no errors or warnings are reported
-      
-  ## 4.3 Package Rendering Metadata
-  ### 4.3.3 General Properties
-
-  Scenario: the 'rendition:flow' property can be used to define the global flow preference
-    When checking file 'rendition-flow-global-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: a 'rendition:flow' property with an unknown value is reported
-    When checking file 'rendition-flow-global-unknown-value-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The value of the "rendition:flow" property must be'
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:flow' property cannot be declared more than once
-    When checking file 'rendition-flow-global-duplicate-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The "rendition:flow" property must not occur more than one time'
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:flow' property cannot be used in a 'meta' element to refine a publication resource
-    When checking file 'rendition-flow-global-refines-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "refines"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:flow' property can be used as a spine override
-    When checking file 'rendition-flow-itemref-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: the 'rendition:flow' spine overrides values are mutually exclusive
-    When checking file 'rendition-flow-itemref-conflict-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "are mutually exclusive"
-    And no other errors or warnings are reported
-  
-  
-  ### 4.3.4 Fixed-Layout Properties
-
-  Scenario: the 'rendition:layout' property can be used to define the global layout preference
-    When checking file 'rendition-layout-global-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: a 'rendition:layout' property with no value is reported
-    See also issue #727
-    When checking file 'rendition-layout-global-empty-error.opf'
-    Then the following errors are reported (one for the empty element, one for the consequently unexpected value)
-      | RSC-005 | character content of element "meta" invalid          |
-      | RSC-005 | The value of the "rendition:layout" property must be |
-    And no other errors or warnings are reported
-
-  Scenario: a 'rendition:layout' property with an unknown value is reported
-    When checking file 'rendition-layout-global-unknown-value-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The value of the "rendition:layout" property must be'
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:layout' property cannot be declared more than once
-    When checking file 'rendition-layout-global-duplicate-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The "rendition:layout" property must not occur more than one time'
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:layout' property cannot be used in a 'meta' element to refine a publication resource
-    When checking file 'rendition-layout-global-refines-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "refines"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:layout' property can be used as a spine override
-    When checking file 'rendition-layout-itemref-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: the 'rendition:layout' spine overrides values are mutually exclusive
-    When checking file 'rendition-layout-itemref-conflict-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "are mutually exclusive"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:page-spread-*' properties can be used without the prefix
-    When checking file 'rendition-page-spread-itemref-unprefixed-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: the 'rendition:page-spread-*' properties values are mutually exclusive
-    When checking file 'rendition-page-spread-itemref-conflict-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "are mutually exclusive"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:orientation' property can be used to define the global orientation preference
-    When checking file 'rendition-orientation-global-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: a 'rendition:orientation' property with an unknown value is reported
-    When checking file 'rendition-orientation-global-unknown-value-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The value of the "rendition:orientation" property must be'
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:orientation' property cannot be declared more than once
-    When checking file 'rendition-orientation-global-duplicate-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The "rendition:orientation" property must not occur more than one time'
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:orientation' property cannot be used in a 'meta' element to refine a publication resource
-    When checking file 'rendition-orientation-global-refines-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "refines"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:orientation' property can be used as a spine override
-    When checking file 'rendition-orientation-itemref-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: the 'rendition:orientation' spine overrides values are mutually exclusive
-    When checking file 'rendition-orientation-itemref-conflict-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "are mutually exclusive"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:spread' property can be used to define the global spread preference
-    When checking file 'rendition-spread-global-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: a 'rendition:spread' property with an unknown value is reported
-    When checking file 'rendition-spread-global-unknown-value-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The value of the "rendition:spread" property must be'
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:spread' property cannot be declared more than once
-    When checking file 'rendition-spread-global-duplicate-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The "rendition:spread" property must not occur more than one time'
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:spread' property cannot be used in a 'meta' element to refine a publication resource
-    When checking file 'rendition-spread-global-refines-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "refines"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:spread' property can be used as a spine override
-    When checking file 'rendition-spread-itemref-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: the 'rendition:spread' spine overrides values are mutually exclusive
-    When checking file 'rendition-spread-itemref-conflict-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "are mutually exclusive"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:spread' 'portrait' value is deprecated as a global value
-    When checking file 'rendition-spread-portrait-global-deprecated-warning.opf'
-    Then warning RSC-017 is reported
-    And the message contains "is deprecated"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:spread' 'spread-portrait' value is deprecated as a spine override
-    When checking file 'rendition-spread-portrait-itemref-deprecated-warning.opf'
-    Then warning RSC-017 is reported
-    And the message contains "is deprecated"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:viewport' property is deprecated
-    When checking file 'rendition-viewport-deprecated-warning.opf'
-    Then warning RSC-017 is reported
-    And the message contains "is deprecated"
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:viewport' property syntax errors are reported
-    When checking file 'rendition-viewport-syntax-error.opf'
-    Then warning RSC-017 is reported (since 'viewport' is deprecated)
-    And error RSC-005 is reported
-    And the message contains 'The value of the "rendition:viewport" property must be of the form'
-    And no other errors or warnings are reported
-
-  Scenario: the 'rendition:viewport' property cannot be declared more than once
-    When checking file 'rendition-viewport-duplicate-error.opf'
-    Then warning RSC-017 is reported 2 times (since 'viewport' is deprecated)
-    And error RSC-005 is reported
-    And the message contains 'The "rendition:viewport" property must not occur more than one time as a global value'
-    And no other errors or warnings are reported
-
-  # C. Meta Properties Vocabulary
-
-  Scenario: 'authority' metadata can refine a subject expression
-  	When checking file 'metadata-meta-authority-valid.opf'
-  	Then no errors or warnings are reported
-
-  Scenario: 'authority' metadata can only refine a subject expression
-  	When checking file 'metadata-meta-authority-refines-disallowed-error.opf'
-  	Then error RSC-005 is reported
-    And the message contains 'Property "authority" must refine a "subject" property'
-  	Then no errors or warnings are reported
-
-  Scenario: 'authority' metadata must be associated to a term
-  	When checking file 'metadata-meta-authority-no-term-error.opf'
-  	Then error RSC-005 is reported
-  	And the message contains "A term property must be associated"
-  	And no other errors or warnings are reported
-
-  Scenario: 'authority' metadata must not be defined more than once
-  	When checking file 'metadata-meta-authority-cardinality-error.opf'
-  	Then error RSC-005 is reported
-  	And the message contains "Only one pair of authority and term properties"
-  	And no other errors or warnings are reported
-
-  Scenario: 'belongs-to-collection' metadata can identify the publication’s collection
-    When checking file 'metadata-meta-collection-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: 'belongs-to-collection' metadata can only refine other 'belongs-to-collection' metadata
-    When checking file 'metadata-meta-collection-refines-non-collection-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'Property "belongs-to-collection" can only refine other "belongs-to-collection" properties'
-    And no other errors or warnings are reported
-
-  Scenario: 'collection-type' cannot be used as a primary metadata
-    When checking file 'metadata-meta-collection-type-refines-missing-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'Property "collection-type" must refine a "belongs-to-collection" property'
-    And no other errors or warnings are reported
-
-  Scenario: 'collection-type' metadata can only refine a 'belongs-to-collection' property
-    When checking file 'metadata-meta-collection-type-refines-non-collection-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'Property "collection-type" must refine a "belongs-to-collection" property'
-    And no other errors or warnings are reported
-
-  Scenario: 'collection-type' metadata cannot be defined more than once to refine the same expression 
-    When checking file 'metadata-meta-collection-type-cardinality-error.opf'
-    Then error RSC-005 is reported
-    And the message contains '"collection-type" cannot be declared more than once'
-    And no other errors or warnings are reported
-  
-  Scenario: 'display-seq' metadata is allowed 
-    When checking file 'metadata-meta-display-seq-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: 'display-seq' metadata cannot be defined more than once to refine the same expression 
-    When checking file 'metadata-meta-display-seq-cardinality-error.opf'
-    Then error RSC-005 is reported
-    And the message contains '"display-seq" cannot be declared more than once'
-    And no other errors or warnings are reported
-  
-  Scenario: 'file-as' metadata is allowed 
-    When checking file 'metadata-meta-file-as-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: 'file-as' metadata cannot be defined more than once to refine the same expression 
-    When checking file 'metadata-meta-file-as-cardinality-error.opf'
-    Then error RSC-005 is reported
-    And the message contains '"file-as" cannot be declared more than once'
-    And no other errors or warnings are reported
-
-  Scenario: 'group-position' metadata is allowed 
-    When checking file 'metadata-meta-group-position-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: 'group-position' metadata cannot be defined more than once to refine the same expression 
-    When checking file 'metadata-meta-group-position-cardinality-error.opf'
-    Then error RSC-005 is reported
-    And the message contains '"group-position" cannot be declared more than once'
-    And no other errors or warnings are reported
-
-	Scenario: 'identifier-type' metadata can only refine a 'source' or 'identifier' property
-    When checking file 'metadata-meta-identifier-type-refines-disallowed-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'Property "identifier-type" must refine an "identifier" or "source" property'
-    And no other errors or warnings are reported
-    
-  Scenario: 'identifier-type' metadata cannot be defined more than once to refine the same expression 
-    When checking file 'metadata-meta-identifier-type-cardinality-error.opf'
-    Then error RSC-005 is reported
-    And the message contains '"identifier-type" cannot be declared more than once'
-    And no other errors or warnings are reported
-    
-  Scenario: 'meta-auth' metadata is deprecated 
-    When checking file 'metadata-meta-meta-auth-deprecated-warning.opf'
-    Then warning RSC-017 is reported
-    And the message contains "the meta-auth property is deprecated"
-    And no other errors or warnings are reported
-
-  Scenario: 'role' metadata can be used once or more to refine a creator, contributor, or publisher 
-    When checking file 'metadata-meta-role-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: 'role' metadata cannot be used to refine properties other than creator, contributor, or publisher  
-    When checking file 'metadata-meta-role-refines-disallowed-error.opf'
-    Then error RSC-005 is reported
-    And the message contains '"role" must refine a "creator", "contributor", or "publisher" property'
-    And no other errors or warnings are reported
-  
-  Scenario: 'source-of' metadata can be used to refine the pagination source 
-    When checking file 'metadata-meta-source-of-valid.opf'
-    Then no errors or warnings are reported
-    
-  Scenario: 'source-of' metadata value must be "pagination" 
-    When checking file 'metadata-meta-source-of-value-unknown-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The "source-of" property must have the value "pagination"'
-    And no other errors or warnings are reported
-  
-  Scenario: 'source-of' metadata cannot be used as a primary metadata 
-    When checking file 'metadata-meta-source-of-refines-missing-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The "source-of" property must refine a "source" property'
-    And no other errors or warnings are reported
-  
-  Scenario: 'source-of' metadata must refine a 'dc:source' metadata entry
-    When checking file 'metadata-meta-source-of-refines-not-dcsource-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'The "source-of" property must refine a "source" property'
-    And no other errors or warnings are reported
-
-  Scenario: 'source-of' metadata cannot be defined more than once to refine the same expression 
-    When checking file 'metadata-meta-source-of-cardinality-error.opf'
-    Then error RSC-005 is reported
-    And the message contains '"source-of" cannot be declared more than once'
-    And no other errors or warnings are reported
-
-  Scenario: 'term' metadata can refine a subject expression
-  	When checking file 'metadata-meta-term-valid.opf'
-  	Then no errors or warnings are reported
-
-  Scenario: 'term' metadata can only refine a subject expression
-  	When checking file 'metadata-meta-term-refines-disallowed-error.opf'
-  	Then error RSC-005 is reported
-    And the message contains 'Property "term" must refine a "subject" property'
-  	Then no errors or warnings are reported
-
-  Scenario: 'term' metadata must be associated to an authority
-  	When checking file 'metadata-meta-term-no-authority-error.opf'
-  	Then error RSC-005 is reported
-  	And the message contains "An authority property must be associated"
-  	And no other errors or warnings are reported
-
-  Scenario: 'term' metadata must not be defined more than once
-  	When checking file 'metadata-meta-term-cardinality-error.opf'
-  	Then error RSC-005 is reported
-  	And the message contains "Only one pair of authority and term properties"
-  	And no other errors or warnings are reported
-
-  Scenario: 'title-type' metadata can be used to refine a title expression 
-    When checking file 'metadata-meta-title-type-valid.opf'
-    Then no errors or warnings are reported
-
-	Scenario: 'title-type' metadata can only refine a 'title' expression
-    When checking file 'metadata-meta-title-type-refines-disallowed-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'Property "title-type" must refine a "title" property'
-    And no other errors or warnings are reported
-
-  Scenario: 'title-type' metadata cannot be defined more than once to refine the same expression 
-    When checking file 'metadata-meta-title-type-cardinality-error.opf'
-    Then error RSC-005 is reported
-    And the message contains '"title-type" cannot be declared more than once'
-    And no other errors or warnings are reported
-  
-  # D. Metadata Link Vocabulary
-  
-  Scenario: the link 'rel' attribute can have multiple properties
-    When checking file 'link-rel-multiple-properties-valid.opf'
-    Then no errors or warnings are reported
-    
-  Scenario: an 'acquire' link can identify the full version of the publication
-    When checking file 'link-rel-acquire-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: an 'alternate' link can identify an alternate version of the Package Document
-    When checking file 'link-rel-alternate-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: an 'alternate' link must not be paired with other keywords
-    When checking file 'link-rel-alternate-with-other-keyword-error.opf'
-    Then error OPF-089 is reported
-    And no other errors or warnings are reported
-
-  Scenario: a 'record' link can point to a local record
-    When checking file 'link-rel-record-local-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: a 'record' link can point to a remote record
-    When checking file 'link-rel-record-remote-valid.opf'
-    Then no errors or warnings are reported
-
-    
-  Scenario: 'record' link can be paired with other keywords
-    When checking file 'link-rel-record-with-other-keyword-valid.opf'
-    Then no errors or warnings are reported
-    
-  Scenario: a 'record' link must have a 'media-type' attribute 
-    When checking file 'link-rel-record-mediatype-missing-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "media-type"
-    And no other errors or warnings are reported
-
-  Scenario: a 'record' link type can be further identified with a 'properties' attribute
-    When checking file 'link-rel-record-properties-valid.opf'
-    And no errors or warnings are reported
-
-  Scenario: a 'record' link with an unknown identifier property is reported
-    When checking file 'link-rel-record-properties-undefined-error.opf'
-    Then error OPF-027 is reported
-    And no other errors or warnings are reported
-    
-  Scenario: a 'record' link with an empty identifier property is reported
-    When checking file 'link-rel-record-properties-empty-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'value of attribute "properties" is invalid'
-    And no other errors or warnings are reported
-
-  Scenario: a 'record' link cannot refine another property or resource
-    When checking file 'link-rel-record-refines-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'must not have a "refines" attribute'
-    And no other errors or warnings are reported
-
-  Scenario: '*-record' links are deprecated 
-    When checking file 'link-rel-record-deprecated-warning.opf'
-    Then the following warnings are reported
-      | OPF-086 | "marc21xml-record" is deprecated |
-      | OPF-086 | "mods-record" is deprecated      |
-      | OPF-086 | "onix-record" is deprecated      |
-      | OPF-086 | "xmp-record" is deprecated       |
-    And no other errors or warnings are reported
-    
-  Scenario: a 'voicing' link can identify the aural representation of metadata
-    When checking file 'link-rel-voicing-valid.opf'
-    Then no errors or warnings are reported
-    
-  Scenario: a 'voicing' link must refine another property or resource
-    When checking file 'link-rel-voicing-as-publication-metadata-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'must have a "refines" attribute'
-    And no other errors or warnings are reported
-
-  Scenario: a 'voicing' link must have a 'media-type' attribute
-    When checking file 'link-rel-voicing-mediatype-missing-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'must have a "media-type" attribute'
-    And no other errors or warnings are reported
-
-  Scenario: a 'voicing' link resource must have an audio media type
-    When checking file 'link-rel-voicing-mediatype-not-audio-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'must have a "media-type" attribute identifying an audio MIME type'
-    And no other errors or warnings are reported
-    
-  Scenario: 'xml-signature' links are deprecated 
-    When checking file 'link-rel-xml-signature-deprecated-warning.opf'
-    Then warning OPF-086 is reported
-    And the message contains '"xml-signature" is deprecated'
-    And no other errors or warnings are reported
-
-  
-  # E. Manifest Properties Vocabulary
-  
-  Scenario: An unknown item property in the default vocab is reported
-    When checking file 'item-property-unknown-error.opf'
-    Then error OPF-027 is reported
-    And no errors or warnings are reported
-  
-  Scenario: The 'cover-image' item property must occur at most once 
-    When checking file 'item-property-cover-image-multiple-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "cover-image"
-    And no other errors or warnings are reported
-
-  Scenario: The 'cover-image' item property must only be used on images 
-    When checking file 'item-property-cover-image-wrongtype-error.opf'
-    Then error OPF-012 is reported
-    And no other errors or warnings are reported
-  
-  Scenario: Report an unknown manifest item property
-    When checking EPUB 'package-manifest-prop-unknown-error'
-    Then error OPF-027 is reported
-    And no other errors or warnings are reported
-
-  ###  E.2.2 mathml
-
-  Scenario: Verify content documents are identified as containing mathml
-    When checking EPUB 'package-mathml-valid'
-    Then no errors or warnings are reported    
-
-  ###  E.2.4 remote-resources
-
-  Scenario: Report the declaration of the `remote-resources` property when the content has no script
-    When checking EPUB 'package-manifest-prop-remote-resource-declared-but-unnecessary-error'
-    Then warning OPF-018 is reported
-    And no other errors or warnings are reported
-
-  Scenario: Report a reference a remote resource when the `remote-resources` property is not set in the manifest
-    When checking EPUB 'package-manifest-prop-remote-resource-undeclared-error'
-    Then error OPF-014 is reported
-    And no other errors or warnings are reported
-
-  Scenario: Report the incorrect use of the `remote-resources` property for a resource defined in an `object` `param` element (issue 249)
-    When checking EPUB 'package-manifest-prop-remote-resource-object-param-warning'
-    Then warning OPF-018 is reported
-    And no other errors or warnings are reported
-
-  Scenario: Report a media overlay document with remote resources but missing the `remote-resources` property
-    When checking EPUB 'package-remote-audio-in-overlays-missing-property-error'
-    Then error OPF-014 is reported
-    And no other errors or warnings are reported
-
-  ###  E.2.5 scripted
-
-  Scenario: Report the declaration of the `scripted` property when the content has no script
-    When checking EPUB 'package-manifest-prop-scripted-declared-but-unnecessary-error'
-    Then error OPF-015 is reported
-    And no other errors or warnings are reported
-
-  Scenario: Report a scripted document without the `scripted` property declared in the package document
-    When checking EPUB 'package-manifest-prop-scripted-undeclared-error'
-    Then error OPF-014 is reported
-    And no other errors or warnings are reported
-
-  Scenario: Verify that script data blocks do not require the `scripted` property to be defined in the manifest
-    When checking EPUB 'package-manifest-prop-scripted-not-required-for-script-data-block-valid'
-    Then no errors or warnings are reported
-
-  ###  E.2.6 svg
-
-  Scenario: Report the declaration of the `svg` property when the content has no embedded SVG
-    When checking EPUB 'package-manifest-prop-svg-declared-but-unnecessary-error'
-    Then error OPF-015 is reported
-    And no other errors or warnings are reported
-
-  Scenario: Report references to embedded SVG when the `svg` property is not set in the manifest 
-    When checking EPUB 'package-manifest-prop-svg-undeclared-error'
-    Then error OPF-014 is reported 2 times
-    And no other errors or warnings are reported
-
-  Scenario: Report reference to an embedded SVG when the `svg` property is not set in the manifest (one reference is set properly)
-    When checking EPUB 'package-manifest-prop-svg-undeclared-partial-error'
-    Then error OPF-014 is reported
-    And no other errors or warnings are reported
-
-
-  ###  E.2.7 switch
-
-  Scenario: Report a content document without the `switch` property declared in the manifest
-    When checking EPUB 'package-manifest-prop-switch-not-declared-error'
-    Then error OPF-014 is reported
-    And warning RSC-017 is reported
-    And the message contains 'The "epub:switch" element is deprecated'
-    And no other errors or warnings are reported
-
-  # F. Spine Properties Vocabulary
-  

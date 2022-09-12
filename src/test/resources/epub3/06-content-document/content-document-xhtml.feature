@@ -1,4 +1,4 @@
-Feature: EPUB 3 â–¸ Content Documents â–¸ XHTML
+Feature: EPUB 3 — Content Documents — XHTML
 
 
   Checks conformance to the "XHTML content documents" section of the EPUB 3.3 specification:

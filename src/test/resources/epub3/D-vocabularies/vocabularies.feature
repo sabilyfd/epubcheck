@@ -9,7 +9,44 @@ Feature: EPUB 3 — Vocabularies
     Given EPUB test files located at '/epub3/D-vocabularies/files/'
     And EPUBCheck with default settings
 
-  # C. Meta Properties Vocabulary
+  # D.1 Vocabulary association mechanisms
+
+  Scenario: the 'prefix' attribute can be used to define new prefix mappings 
+    When checking file 'property-prefix-declaration-valid.opf'
+    Then no errors or warnings are reported
+
+  Scenario: reserved prefixes can be explicitly declared
+    When checking file 'property-prefix-declaration-reserved-explicit-valid.opf'
+    Then no errors or warnings are reported
+
+  Scenario: syntax errors in the 'prefix' attribute are reported
+    When checking file 'property-prefix-declaration-syntax-error.opf'
+    Then error OPF-004c is reported 2 times (the test file contains 2 syntax errors)
+    And no other errors or warnings are reported
+
+  Scenario: reserved prefixes should not be overridden to other vocabularies 
+    When checking file 'property-prefix-declaration-reserved-overridden-warning.opf'
+    Then warning OPF-007 is reported 8 times (once for each reserved prefix)
+    And no other errors or warnings are reported
+
+  Scenario: default vocabularies must not be assigned a prefix
+  	Note: This should be an error, but is currently reported as a warning
+  	See issue 522: https://github.com/w3c/epubcheck/issues/522
+    When checking file 'property-prefix-declaration-default-vocabs-error.opf'
+    Then warning OPF-007b is reported 4 times (once for each default vocabulary)
+    And no other errors or warnings are reported
+
+  Scenario: A metadata property with an unknown prefix is reported
+    When checking file 'property-prefix-declaration-missing-error.opf'
+    Then error OPF-028 is reported
+    And no errors or warnings are reported
+
+  Scenario: The 'schema' prefix can be used in metadata properties without being declared
+    When checking file 'property-prefix-schema-not-declared-valid.opf'
+    Then no errors or warnings are reported
+
+
+  # D.3 Meta properties vocabulary
 
   Scenario: 'authority' metadata can refine a subject expression
   	When checking file 'metadata-meta-authority-valid.opf'

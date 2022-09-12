@@ -35,47 +35,7 @@ Feature: EPUB 3 — Packages Document
     And no other errors or warnings are reported
 
 
-  # 3.4 Pacakge Document Definition
-  
-  ## 3.4.1 The package element
-
-  Scenario: the unique identifier must not be empty
-    When checking EPUB 'package-unique-identifier-attribute-missing-error.opf'
-    # FIXME OPF-048 could be removed, as it is already reported as RSC-005
-    Then the following errors are reported
-      | RSC-005 | missing required attribute                       |
-      | OPF-048 | missing its required unique-identifier attribute |
-    And no other errors or warnings are reported
-  
-  Scenario: the 'package' 'unique-identifier' attribute must be a known ID
-    When checking file 'package-unique-identifier-unknown-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "does not resolve to a dc:identifier element"
-    And no other errors or warnings are reported 
-    
-  Scenario: the 'package' 'unique-identifier' attribute must point to a 'dc:identifier' element
-    When checking file 'package-unique-identifier-not-targeting-identifier-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "does not resolve to a dc:identifier element"
-    And no other errors or warnings are reported 
-  
-  Scenario: the 'package' element must have a 'metadata' child element  
-    When checking file 'package-no-metadata-element-error.opf'
-    Then error RSC-005 is reported (missing metadata element)
-    And the message contains 'missing required element "metadata"'
-    And error RSC-005 is reported (side effect: missing unique-identifier target) 
-    And no other errors or warnings are reported
-    
-  Scenario: the 'package' element's 'metadata' child must be before the 'manifest' child  
-    When checking file 'package-manifest-before-metadata-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'element "manifest" not allowed yet'
-    And error RSC-005 is reported
-    And the message contains 'element "metadata" not allowed here' 
-    And no other errors or warnings are reported
-
-  
-  ## 3.4.2 Shared attributes
+  ## 5.3 Shared attributes
   
   Scenario: 'id' attributes can have leading or trailing space 
     When checking file 'attr-id-with-spaces-valid.opf'
@@ -114,10 +74,50 @@ Feature: EPUB 3 — Packages Document
     When checking EPUB 'package-lang-three-char-code-valid'
     Then no errors or warnings are reported
   
-  ## 3.4.3 Metadata
-  ### 3.4.3 The metadata element
-  #### 3.4.3.2 DCMES Required Elements
+
+  ## 5.4 The package element
+
+  Scenario: the unique identifier must not be empty
+    When checking EPUB 'package-unique-identifier-attribute-missing-error.opf'
+    # FIXME OPF-048 could be removed, as it is already reported as RSC-005
+    Then the following errors are reported
+      | RSC-005 | missing required attribute                       |
+      | OPF-048 | missing its required unique-identifier attribute |
+    And no other errors or warnings are reported
   
+  Scenario: the 'package' 'unique-identifier' attribute must be a known ID
+    When checking file 'package-unique-identifier-unknown-error.opf'
+    Then error RSC-005 is reported
+    And the message contains "does not resolve to a dc:identifier element"
+    And no other errors or warnings are reported 
+    
+  Scenario: the 'package' 'unique-identifier' attribute must point to a 'dc:identifier' element
+    When checking file 'package-unique-identifier-not-targeting-identifier-error.opf'
+    Then error RSC-005 is reported
+    And the message contains "does not resolve to a dc:identifier element"
+    And no other errors or warnings are reported 
+  
+  Scenario: the 'package' element must have a 'metadata' child element  
+    When checking file 'package-no-metadata-element-error.opf'
+    Then error RSC-005 is reported (missing metadata element)
+    And the message contains 'missing required element "metadata"'
+    And error RSC-005 is reported (side effect: missing unique-identifier target) 
+    And no other errors or warnings are reported
+    
+  Scenario: the 'package' element's 'metadata' child must be before the 'manifest' child  
+    When checking file 'package-manifest-before-metadata-error.opf'
+    Then error RSC-005 is reported
+    And the message contains 'element "manifest" not allowed yet'
+    And error RSC-005 is reported
+    And the message contains 'element "metadata" not allowed here' 
+    And no other errors or warnings are reported
+
+  
+  ## 5.5 Metadata section
+  
+  ### 5.5.1 The metadata element
+  
+  ### 5.5.3 Dublin Core required elements
     
   Scenario: 'dc:identifier' must not be empty 
     When checking file 'metadata-identifier-empty-error.opf'
@@ -165,7 +165,7 @@ Feature: EPUB 3 — Packages Document
     And the message contains "must be a string with length at least 1" 
     And no other errors or warnings are reported
     
-  #### 3.4.3.3 DCMES Optional Elements
+  #### 5.5.4 Dublin Core optional elements
   
   Scenario: 'dc:date' can be specified as an ISO 8601:2004 value 
     When checking file 'metadata-date-single-year-valid.opf'
@@ -200,7 +200,7 @@ Feature: EPUB 3 — Packages Document
     Then no errors or warnings are reported
     
   
-  #### 3.4.3.4 The meta Element
+  #### 5.5.5 The meta element
   
   Scenario: a metadata's property name must be defined 
     When checking file 'metadata-meta-property-empty-error.opf'
@@ -265,7 +265,7 @@ Feature: EPUB 3 — Packages Document
     And no other errors or warnings are reported
   
 
-  #### 3.4.3.5 The link Element
+  #### 5.5.7 The link element
   
   Scenario: 'link' targets must not be manifest items 
     When checking file 'link-to-publication-resource-error.opf'
@@ -294,6 +294,7 @@ Feature: EPUB 3 — Packages Document
     When checking EPUB 'package-link-missing-resource-error'
     Then warning RSC-007w is reported
     And no other errors or warnings are reported
+  
   
   ### 5.6 Manifest section
   
@@ -461,7 +462,7 @@ Feature: EPUB 3 — Packages Document
     And no other errors or warnings are reported
 
 
-  #### 5.6.2 The item Element
+  #### 5.6.2 The item element
   
   Scenario: a manifest item must declare a media type  
     When checking file 'item-media-type-missing-error.opf'
@@ -555,7 +556,7 @@ Feature: EPUB 3 — Packages Document
     And the message contains 'fallback-style'
     And no other errors or warnings are reported
 
-  #### 3.4.4.4 The bindings Element
+  #### 5.6.3 The bindings Element
   
   Scenario: Report usage of the 'bindings' element as deprecated 
     When checking file 'bindings-deprecated-warning.opf'
@@ -586,8 +587,9 @@ Feature: EPUB 3 — Packages Document
     And error OPF-046 is reported (to report the duplicate handler)
     And no other errors or warnings are reported
   
-  ### 3.4.5 Spine
-  #### 3.4.5.1 The spine Element
+  ### 5.7 Spine section
+  
+  #### 5.7.1 The spine element
 
   Scenario: Report a missing spine
     When checking EPUB 'package-spine-missing-error'
@@ -596,7 +598,7 @@ Feature: EPUB 3 — Packages Document
       | RSC-011 | reference to a resource that is not a spine item | # in the Nav Doc
     And no other errors or warnings are reported
 
-  #### 3.4.5.2 The itemref Element
+  #### 5.7.2 The itemref element
   
   Scenario: An SVG Content Document is allowed in the spine 
     When checking file 'spine-item-svg-valid.opf'
@@ -614,7 +616,10 @@ Feature: EPUB 3 — Packages Document
     And the message contains "Itemref refers to the same manifest entry as a previous itemref"
     And no other errors or warnings are reported
 
-  ### 3.4.6 Collections
+
+  ## 5.8 Collections
+  
+  ### 5.8.1 The collection element
 
   Scenario: a collection role can be an absolute URL
     When checking file 'collection-role-url-valid.opf'
@@ -643,9 +648,11 @@ Feature: EPUB 3 — Packages Document
     And the message contains "A manifest collection must be the child of another collection"
     And no other errors or warnings are reported
 
-  ### 3.4.7 Legacy
-  #### 3.4.7.1 The meta Element
-  #### 3.4.7.2 The guide Element
+  ## 5.9 Legacy content
+  
+  #### 5.9.1 The meta element
+  
+  #### 5.9.2 The guide element
 
   Scenario: 'guide' should not contain two entries of the same type pointing to the same resource
     When checking EPUB 'legacy-guide-duplicates-warning.opf'
@@ -653,7 +660,7 @@ Feature: EPUB 3 — Packages Document
     And the message contains 'Duplicate "reference" elements with the same "type" and "href" attributes'
     And no other errors or warnings are reported
     
-  #### 3.4.7.3 NCX
+  #### 5.9.3 NCX
 
   Scenario: When an NCX document is present, it must be identified in the 'toc' attribute of the spine  
     When checking file 'legacy-ncx-toc-attribute-missing-error.opf'
@@ -680,44 +687,4 @@ Feature: EPUB 3 — Packages Document
   Scenario: Verify an NCX which does not link to all spine items
     Given the reporting level set to USAGE
     When checking EPUB 'package-ncx-missing-references-to-spine-valid'
-    Then no errors or warnings are reported
-    
-  # 4. Package Metadata
-  
-  ## 4.1 Publication Identifiers
-  
-  ## 4.2 Vocabulary Association Mechanisms
-
-  Scenario: the 'prefix' attribute can be used to define new prefix mappings 
-    When checking file 'property-prefix-declaration-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: reserved prefixes can be explicitly declared
-    When checking file 'property-prefix-declaration-reserved-explicit-valid.opf'
-    Then no errors or warnings are reported
-
-  Scenario: syntax errors in the 'prefix' attribute are reported
-    When checking file 'property-prefix-declaration-syntax-error.opf'
-    Then error OPF-004c is reported 2 times (the test file contains 2 syntax errors)
-    And no other errors or warnings are reported
-
-  Scenario: reserved prefixes should not be overridden to other vocabularies 
-    When checking file 'property-prefix-declaration-reserved-overridden-warning.opf'
-    Then warning OPF-007 is reported 8 times (once for each reserved prefix)
-    And no other errors or warnings are reported
-
-  Scenario: default vocabularies must not be assigned a prefix
-  	Note: This should be an error, but is currently reported as a warning
-  	See issue 522: https://github.com/w3c/epubcheck/issues/522
-    When checking file 'property-prefix-declaration-default-vocabs-error.opf'
-    Then warning OPF-007b is reported 4 times (once for each default vocabulary)
-    And no other errors or warnings are reported
-
-  Scenario: A metadata property with an unknown prefix is reported
-    When checking file 'property-prefix-declaration-missing-error.opf'
-    Then error OPF-028 is reported
-    And no errors or warnings are reported
-
-  Scenario: The 'schema' prefix can be used in metadata properties without being declared
-    When checking file 'property-prefix-schema-not-declared-valid.opf'
     Then no errors or warnings are reported

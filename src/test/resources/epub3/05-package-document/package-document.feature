@@ -1,4 +1,4 @@
-Feature: EPUB 3 — Packages Document
+Feature: EPUB 3 — Package document
 
 
   Checks conformance to the "Package document" section of the EPUB 3.3 specification:
@@ -15,25 +15,6 @@ Feature: EPUB 3 — Packages Document
   Scenario: Verify that the Package Document can have any extension
     When checking EPUB 'package-file-extension-unusual-valid'
     Then no errors or warnings are reported
-
-  # 5.2 Content Conformance
-
-  Scenario: the minimal Package Document is reported as valid 
-    When checking file 'minimal.opf'
-    Then no errors or warnings are reported
-    
-  Scenario: a not well-formed Package Document is reported 
-    When checking file 'conformance-xml-malformed-error.opf'
-    Then fatal error RSC-016 is reported (parsing error)
-    And error RSC-005 is reported (schema error)
-    And no other errors or warnings are reported
-    
-  Scenario: using a not-declared namespace is not allowed 
-    When checking file 'conformance-xml-undeclared-namespace-error.opf'
-    Then fatal error RSC-016 is reported (parsing error)
-    And error RSC-005 is reported (schema error)
-    And no other errors or warnings are reported
-
 
   ## 5.3 Shared attributes
   

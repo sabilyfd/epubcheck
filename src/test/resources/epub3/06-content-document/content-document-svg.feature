@@ -1,4 +1,4 @@
-Feature: EPUB 3 — Content Documents — SVG
+Feature: EPUB 3 â€” Content Documents â€” SVG
 
 
   Checks conformance to the "SVG content documents" section of the EPUB 3.3 specification:
@@ -20,7 +20,7 @@ Feature: EPUB 3 — Content Documents — SVG
     When checking EPUB 'content-svg-no-viewbox-not-fxl-valid'
     Then no errors or warnings are reported
 
-  Scenario: Report SVG `use` elements that donâ€™t point to a document fragment
+  Scenario: Report SVG `use` elements that donÃ¢â‚¬â„¢t point to a document fragment
     When checking EPUB 'content-svg-use-href-no-fragment-error'
     Then error RSC-015 is reported
     And no other errors or warnings are reported

@@ -1,4 +1,4 @@
- Feature: EPUB 3 — Publication Resources
+ Feature: EPUB 3 â€” Publication Resources
 
   
   Checks conformance to the "Publication resources" section of the EPUB 3.3 specification:

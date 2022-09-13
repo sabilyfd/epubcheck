@@ -1,4 +1,4 @@
-Feature: EPUB 3 — EPUB publication conformance
+Feature: EPUB 3 â€” EPUB publication conformance
 
 
   Checks conformance to the "EPUB publication conformance" section of the EPUB 3.3 specification:
@@ -17,7 +17,8 @@ Feature: EPUB 3 — EPUB publication conformance
     When checking file 'minimal.opf'
     Then no errors or warnings are reported
 
-  @spec @xref:sec-epub-conf @xref:sec-zip-container-zipreqs
+  @spec @xref:sec-epub-conf
   Scenario: Verify a minimal packaged EPUB
-    When checking EPUB 'ocf-zip-valid.epub'
+    When checking EPUB 'minimal.epub'
     Then no errors or warnings are reported
+

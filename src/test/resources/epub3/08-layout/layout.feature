@@ -1,4 +1,4 @@
-Feature: EPUB 3 — Layout Rendering Control
+Feature: EPUB 3 â€” Layout Rendering Control
 
 
   Checks conformance to the "Layout rendering control" section of the EPUB 3.3 specification:

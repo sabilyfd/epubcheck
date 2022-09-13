@@ -1,4 +1,4 @@
-Feature: EPUB 3 — Package document
+Feature: EPUB 3 â€” Package document
 
 
   Checks conformance to the "Package document" section of the EPUB 3.3 specification:
@@ -18,6 +18,14 @@ Feature: EPUB 3 — Package document
 
   ## 5.3 Shared attributes
   
+  ### 5.3.1 dir
+  
+  Scenario: the 'dir' attribute value can be 'auto' 
+    When checking file 'attr-dir-auto-valid.opf'
+    Then no errors or warnings are reported
+
+  ### 5.3.3 id
+  
   Scenario: 'id' attributes can have leading or trailing space 
     When checking file 'attr-id-with-spaces-valid.opf'
     Then no errors or warnings are reported
@@ -32,10 +40,8 @@ Feature: EPUB 3 — Package document
     Then error RSC-005 is reported 2 times (once for each ID)
     And no other errors or warnings are reported
 
-  Scenario: the 'dir' attribute value can be 'auto' 
-    When checking file 'attr-dir-auto-valid.opf'
-    Then no errors or warnings are reported
-
+  ### 5.3.7 xml:lang
+  
   Scenario: the 'xml:lang' attribute can be empty
     When checking file 'attr-lang-empty-valid.opf'
     Then no other errors or warnings are reported

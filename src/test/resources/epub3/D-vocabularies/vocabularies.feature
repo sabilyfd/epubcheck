@@ -1,4 +1,4 @@
-Feature: EPUB 3 � Vocabularies
+Feature: EPUB 3 — Vocabularies
 
 
   Checks conformance to the "Vocabularies" section of the EPUB 3.3 specification:
@@ -70,7 +70,7 @@ Feature: EPUB 3 � Vocabularies
   	And the message contains "Only one pair of authority and term properties"
   	And no other errors or warnings are reported
 
-  Scenario: 'belongs-to-collection' metadata can identify the publication’s collection
+  Scenario: 'belongs-to-collection' metadata can identify the publicationâ€™s collection
     When checking file 'metadata-meta-collection-valid.opf'
     Then no errors or warnings are reported
 

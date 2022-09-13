@@ -1,4 +1,4 @@
-Feature: EPUB 3 — Open Container Format
+Feature: EPUB 3 â€” Open Container Format
 
 
   Checks conformance to the "Open Container Format (OCF)" section of the EPUB 3.3 specification:
@@ -147,6 +147,11 @@ Feature: EPUB 3 — Open Container Format
   ## 4.2 OCF ZIP container  
   
   ### 4.2.2 ZIP file requirements
+
+  @spec @xref:sec-epub-conf @xref:sec-zip-container-zipreqs
+  Scenario: Verify a minimal packaged EPUB
+    When checking EPUB 'ocf-zip-valid.epub'
+    Then no errors or warnings are reported
 
   @spec @xref:sec-zip-container-zipreqs
   Scenario: Report an unreadable ZIP file (empty file)

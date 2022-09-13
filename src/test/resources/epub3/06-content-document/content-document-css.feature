@@ -1,4 +1,4 @@
-Feature: EPUB 3 — Content Documents — CSS
+Feature: EPUB 3 â€” Content Documents â€” CSS
 
 
   Checks conformance to the "Cascading Style Sheets" section of the EPUB 3.3 specification:

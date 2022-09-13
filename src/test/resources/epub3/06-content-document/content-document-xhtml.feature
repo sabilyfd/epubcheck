@@ -371,6 +371,10 @@ Feature: EPUB 3 — Content Documents — XHTML
     And the message contains 'lang and xml:lang attributes must have the same value'
     And no other errors or warnings are reported
 
+  Scenario: Verify that three-character language codes are allowed (issue 615)
+    When checking EPUB 'lang-three-char-code-valid.xhtml'
+    Then no errors or warnings are reported
+
 
   ####  Links
 

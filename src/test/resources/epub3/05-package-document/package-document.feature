@@ -16,32 +16,68 @@ Feature: EPUB 3 — Package document
     When checking EPUB 'package-file-extension-unusual-valid'
     Then no errors or warnings are reported
 
+
   ## 5.3 Shared attributes
   
-  ### 5.3.1 dir
+  ### 5.3.1 The dir attribute
   
+  @spec @xref:attrdef-dir
   Scenario: the 'dir' attribute value can be 'auto' 
     When checking file 'attr-dir-auto-valid.opf'
     Then no errors or warnings are reported
 
-  ### 5.3.3 id
+
+  ### 5.3.3 The id attribute
   
   Scenario: 'id' attributes can have leading or trailing space 
     When checking file 'attr-id-with-spaces-valid.opf'
     Then no errors or warnings are reported
   
+  @spec @xref:attrdef-id
   Scenario: 'id' attributes must be unique 
     When checking file 'attr-id-duplicate-error.opf'
     Then error RSC-005 is reported 2 times (once for each ID)
     And no other errors or warnings are reported
   
+  @spec @xref:attrdef-id
   Scenario: 'id' attributes must be unique after whitespace normalization 
     When checking file 'attr-id-duplicate-with-spaces-error.opf'
     Then error RSC-005 is reported 2 times (once for each ID)
     And no other errors or warnings are reported
 
-  ### 5.3.7 xml:lang
+
+  ### 5.3.6 The refines attribute
   
+  @spec @xref:attrdef-refines
+  Scenario: 'refines' attribute MUST be a relative URL 
+    When checking file 'metadata-refines-not-relative-error.opf'
+    Then error RSC-005 is reported
+    And the message contains "@refines must be a relative URL"
+    And no other errors or warnings are reported
+
+  Scenario: 'refines' attribute should use a fragment ID if refering to a Publication Resource 
+    When checking file 'metadata-refines-not-a-fragment-warning.opf'
+    Then warning RSC-017 is reported
+    And the message contains "using a fragment identifier pointing to its manifest item"
+    And no other errors or warnings are reported
+
+  @spec @xref:attrdef-refines
+  Scenario: 'refines' attribute, when using fragment ID, must target an existing ID
+    When checking file 'metadata-refines-unknown-id-error.opf'
+    Then error RSC-005 is reported
+    And the message contains "@refines missing target id"
+    And no other errors or warnings are reported
+    
+  @spec @xref:attrdef-refines
+  Scenario: 'refines' references cycles are not allowed
+    When checking file 'metadata-refines-cycle-error.opf'
+    Then error OPF-065 is reported
+    And no other errors or warnings are reported
+    
+  
+  ### 5.3.7 The xml:lang attribute
+  
+  @spec @xref:attrdef-xml-lang
   Scenario: the 'xml:lang' attribute can be empty
     When checking file 'attr-lang-empty-valid.opf'
     Then no other errors or warnings are reported
@@ -51,39 +87,35 @@ Feature: EPUB 3 — Package document
     Then error OPF-092 is reported
     And no other errors or warnings are reported
 
+  @spec @xref:attrdef-xml-lang
   Scenario: the 'xml:lang' language tag must be well-formed   
     When checking file 'attr-lang-not-well-formed-error.opf'
     Then error OPF-092 is reported
     And no other errors or warnings are reported
 
-  # FIXME does this test really requires a full EPUB?
+  @spec @xref:attrdef-xml-lang
   Scenario: Verify that three-character language codes are allowed (issue 615)
-    When checking EPUB 'package-lang-three-char-code-valid'
+    When checking EPUB 'attr-lang-three-char-code-valid.opf'
     Then no errors or warnings are reported
   
 
   ## 5.4 The package element
 
-  Scenario: the unique identifier must not be empty
-    When checking EPUB 'package-unique-identifier-attribute-missing-error.opf'
-    # FIXME OPF-048 could be removed, as it is already reported as RSC-005
-    Then the following errors are reported
-      | RSC-005 | missing required attribute                       |
-      | OPF-048 | missing its required unique-identifier attribute |
-    And no other errors or warnings are reported
-  
+  @spec @xref:sec-package-elem
   Scenario: the 'package' 'unique-identifier' attribute must be a known ID
     When checking file 'package-unique-identifier-unknown-error.opf'
     Then error RSC-005 is reported
     And the message contains "does not resolve to a dc:identifier element"
     And no other errors or warnings are reported 
     
+  @spec @xref:sec-package-elem
   Scenario: the 'package' 'unique-identifier' attribute must point to a 'dc:identifier' element
     When checking file 'package-unique-identifier-not-targeting-identifier-error.opf'
     Then error RSC-005 is reported
     And the message contains "does not resolve to a dc:identifier element"
     And no other errors or warnings are reported 
   
+  @spec @xref:sec-package-elem
   Scenario: the 'package' element must have a 'metadata' child element  
     When checking file 'package-no-metadata-element-error.opf'
     Then error RSC-005 is reported (missing metadata element)
@@ -91,6 +123,7 @@ Feature: EPUB 3 — Package document
     And error RSC-005 is reported (side effect: missing unique-identifier target) 
     And no other errors or warnings are reported
     
+  @spec @xref:sec-package-elem
   Scenario: the 'package' element's 'metadata' child must be before the 'manifest' child  
     When checking file 'package-manifest-before-metadata-error.opf'
     Then error RSC-005 is reported
@@ -103,57 +136,95 @@ Feature: EPUB 3 — Package document
   ## 5.5 Metadata section
   
   ### 5.5.1 The metadata element
+
+
+  ### 5.5.2 Metadata values
   
-  ### 5.5.3 Dublin Core required elements
+  @spec @xref:sec-metadata-values
+  Scenario: the unique identifier must not be empty
+    When checking EPUB 'package-unique-identifier-attribute-missing-error.opf'
+    # FIXME OPF-048 could be removed, as it is already reported as RSC-005
+    Then the following errors are reported
+      | RSC-005 | missing required attribute                       |
+      | OPF-048 | missing its required unique-identifier attribute |
+    And no other errors or warnings are reported
     
+  @spec @xref:sec-metadata-values
   Scenario: 'dc:identifier' must not be empty 
     When checking file 'metadata-identifier-empty-error.opf'
     Then error RSC-005 is reported
     And the message contains "must be a string with length at least 1" 
     And no other errors or warnings are reported
-    
- Scenario: 'dc:identifier' starting with "urn:uuid:" should be a valid UUID  
-    When checking file 'metadata-identifier-uuid-invalid-warning.opf'
-    Then warning OPF-085 is reported
-    And no other errors or warnings are reported
 
- Scenario: 'dc:language' must not be empty  
+  @spec @xref:sec-metadata-values
+  Scenario: 'dc:language' must not be empty  
     When checking file 'metadata-language-empty-error.opf'
     Then error RSC-005 is reported
     And the message contains "must be a string with length at least 1"
     And no other errors or warnings are reported
 
- Scenario: 'dc:language' must be well-formed  
-    When checking file 'metadata-language-not-well-formed-error.opf'
-    Then error OPF-092 is reported
-    And no other errors or warnings are reported
-
-  Scenario: 'dc:modified' must be defined 
-    When checking file 'metadata-modified-missing-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "dcterms:modified"
-    And no other errors or warnings are reported
-
-  Scenario: 'dc:modified' must be of the form 'CCYY-MM-DDThh:mm:ssZ' 
-    When checking file 'metadata-modified-syntax-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "CCYY-MM-DDThh:mm:ssZ"
-    And no other errors or warnings are reported
-
-  Scenario: 'dc:title' must be specified
-    When checking file 'metadata-title-missing-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'missing required element "dc:title"' 
-    And no other errors or warnings are reported
-
+  @spec @xref:sec-metadata-values
   Scenario: 'dc:title' must not be empty 
     When checking file 'metadata-title-empty-error.opf'
     Then error RSC-005 is reported
     And the message contains "must be a string with length at least 1" 
     And no other errors or warnings are reported
     
-  #### 5.5.4 Dublin Core optional elements
+  @spec @xref:sec-metadata-values
+  Scenario: a metadata's value must be defined 
+    When checking file 'metadata-meta-value-empty-error.opf'
+    Then error RSC-005 is reported
+    And the message contains "must be a string with length at least 1" 
+    And no other errors or warnings are reported
+
+
+  ### 5.5.3 Dublin Core required elements
+    
+  #### 5.5.3.1 The dc:identifier element
   
+  Scenario: 'dc:identifier' starting with "urn:uuid:" should be a valid UUID  
+    When checking file 'metadata-identifier-uuid-invalid-warning.opf'
+    Then warning OPF-085 is reported
+    And no other errors or warnings are reported
+
+
+  #### 5.5.3.2 The dc:title element
+  
+  @spec @xref:sec-opf-dctitle
+  Scenario: 'dc:title' must be specified
+    When checking file 'metadata-title-missing-error.opf'
+    Then error RSC-005 is reported
+    And the message contains 'missing required element "dc:title"' 
+    And no other errors or warnings are reported
+
+
+  #### 5.5.3.3 The dc:language element
+  
+  @spec @xref:sec-opf-dclanguage
+  Scenario: 'dc:language' must be well-formed  
+    When checking file 'metadata-language-not-well-formed-error.opf'
+    Then error OPF-092 is reported
+    And no other errors or warnings are reported
+
+    
+  ### 5.5.4 Dublin Core optional elements
+
+  #### 5.5.4.1 General definition
+  
+  Scenario: 'dc:source' valid values are allowed 
+    When checking file 'metadata-source-valid.opf'
+    Then no errors or warnings are reported
+
+
+  #### 5.5.4.4 The dc:date element
+  
+  @spec @xref:sec-opf-dcdate
+  Scenario: Multiple 'dc:date' elements specified
+    When checking file 'metadata-date-multiple-error.opf'
+    Then error RSC-005 is reported
+    And the message contains 'element "dc:date" not allowed here' 
+    And no errors or warnings are reported
+
   Scenario: 'dc:date' can be specified as an ISO 8601:2004 value 
     When checking file 'metadata-date-single-year-valid.opf'
     Then no errors or warnings are reported
@@ -177,24 +248,25 @@ Feature: EPUB 3 — Package document
     Then warning OPF-053 is reported
     And the message contains "does not follow recommended syntax"
     And no errors or warnings are reported
-    
-  Scenario: 'dc:source' valid values are allowed 
-    When checking file 'metadata-source-valid.opf'
-    Then no errors or warnings are reported
+
+
+  #### 5.5.4.6 The dc:type element
   
   Scenario: 'dc:type' valid values are allowed 
     When checking file 'metadata-type-valid.opf'
     Then no errors or warnings are reported
-    
+
+
+  ### 5.5.5 The meta element
   
-  #### 5.5.5 The meta element
-  
+  @spec @xref:sec-meta-elem
   Scenario: a metadata's property name must be defined 
     When checking file 'metadata-meta-property-empty-error.opf'
     Then error RSC-005 is reported 2 times
     And the message contains 'value of attribute "property" is invalid' 
     And no other errors or warnings are reported
     
+  @spec @xref:sec-meta-elem
   Scenario: a metadata's property name must not be a list of values 
     When checking file 'metadata-meta-property-list-error.opf'
     Then error RSC-005 is reported (value is not an NMTOKEN)
@@ -206,80 +278,82 @@ Feature: EPUB 3 — Package document
     When checking file 'metadata-meta-property-malformed-error.opf'
     Then error OPF-026 is reported
     And no other errors or warnings are reported
-    
-  Scenario: a metadata's value must be defined 
-    When checking file 'metadata-meta-value-empty-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "must be a string with length at least 1" 
-    And no other errors or warnings are reported
 
-  Scenario: 'refines' attribute MUST be a relative URL 
-    When checking file 'metadata-refines-not-relative-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "@refines must be a relative URL"
-    And no other errors or warnings are reported
-
-  Scenario: 'refines' attribute should use a fragment ID if refering to a Publication Resource 
-    When checking file 'metadata-refines-not-a-fragment-warning.opf'
-    Then warning RSC-017 is reported
-    And the message contains "using a fragment identifier pointing to its manifest item"
-    And no other errors or warnings are reported
-
-  Scenario: 'refines' attribute, when using fragment ID, must target an existing ID
-    When checking file 'metadata-refines-unknown-id-error.opf'
-    Then error RSC-005 is reported
-    And the message contains "@refines missing target id"
-    And no other errors or warnings are reported
-    
-  Scenario: 'refines' references cycles are not allowed
-    When checking file 'metadata-refines-cycle-error.opf'
-    Then error OPF-065 is reported
-    And no other errors or warnings are reported
-    
   Scenario: 'scheme' can be used to identify the value system
     When checking file 'metadata-meta-scheme-valid.opf'
     Then no errors or warnings are reported
     
+  @spec @xref:sec-meta-elem
   Scenario: 'scheme' must not be list of values
     When checking file 'metadata-meta-scheme-list-error.opf'
     Then error RSC-005 is reported (value is not an NMTOKEN)
     And error OPF-025 is reported
     And no other errors or warnings are reported
     
+  @spec @xref:sec-meta-elem
   Scenario: 'scheme' must not be an unknown value with no prefix
     When checking file 'metadata-meta-scheme-unknown-error.opf'
     Then error OPF-027 is reported
     And no other errors or warnings are reported
-  
 
-  #### 5.5.7 The link element
+
+  ### 5.5.6 Last modified date
+
+  @spec @xref:sec-metadata-last-modified
+  Scenario: 'dc:modified' must be defined 
+    When checking file 'metadata-modified-missing-error.opf'
+    Then error RSC-005 is reported
+    And the message contains "dcterms:modified"
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-metadata-last-modified
+  Scenario: 'dc:modified' must be of the form 'CCYY-MM-DDThh:mm:ssZ' 
+    When checking file 'metadata-modified-syntax-error.opf'
+    Then error RSC-005 is reported
+    And the message contains "CCYY-MM-DDThh:mm:ssZ"
+    And no other errors or warnings are reported
+
+
+  ### 5.5.7 The link element
   
-  Scenario: 'link' targets must not be manifest items 
+  @spec @xref:sec-link-elem
+  Scenario: 'link' target must not reference a manifest ID
     When checking file 'link-to-publication-resource-error.opf'
     Then error OPF-067 is reported
-    And no other errors or warnings are reported
-
-  Scenario: the 'link' element can have an 'hreflang' attribute
-    When checking file 'link-hreflang-valid.opf'
-    Then no other errors or warnings are reported
-
-  Scenario: the 'link' 'hreflang' attribute can be empty
-    When checking file 'link-hreflang-empty-valid.opf'
-    Then no other errors or warnings are reported
-
-  Scenario: the 'link' 'hreflang' language tag must not have leading/trailing whitespace   
-    When checking file 'link-hreflang-whitespace-error.opf'
-    Then error OPF-092 is reported
-    And no other errors or warnings are reported
-
-  Scenario: the 'link' 'hreflang' language tag must be well-formed   
-    When checking file 'link-hreflang-not-well-formed-error.opf'
-    Then error OPF-092 is reported
     And no other errors or warnings are reported
 
   Scenario: Report a package metadata link to a missing resource
     When checking EPUB 'package-link-missing-resource-error'
     Then warning RSC-007w is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-link-elem
+  Scenario: A link to a local resource must declare a media type  
+    When checking file 'package-link-missing-media-type-error'
+    # Then error RSC-005 is reported
+    # And the message contains 'missing required attribute "media-type"'
+    # And no other errors or warnings are reported
+    Then no other errors or warnings are reported
+
+  Scenario: the 'link' element can have an 'hreflang' attribute
+    When checking file 'link-hreflang-valid.opf'
+    Then no other errors or warnings are reported
+
+  @spec @xref:sec-link-elem
+  Scenario: the 'link' 'hreflang' attribute can be empty
+    When checking file 'link-hreflang-empty-valid.opf'
+    Then no other errors or warnings are reported
+
+  @spec @xref:sec-link-elem
+  Scenario: the 'link' 'hreflang' language tag must not have leading/trailing whitespace   
+    When checking file 'link-hreflang-whitespace-error.opf'
+    Then error OPF-092 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-link-elem
+  Scenario: the 'link' 'hreflang' language tag must be well-formed   
+    When checking file 'link-hreflang-not-well-formed-error.opf'
+    Then error OPF-092 is reported
     And no other errors or warnings are reported
   
   

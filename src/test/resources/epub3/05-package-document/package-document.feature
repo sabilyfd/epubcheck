@@ -27,6 +27,16 @@ Feature: EPUB 3 — Package document
     Then no errors or warnings are reported
 
 
+  ### 5.3.2 The href attribute
+  
+  @spec @xref:attrdef-href
+  Scenario: 'link' target must not reference a manifest ID
+    When checking file 'link-to-publication-resource-error.opf'
+    Then error OPF-067 is reported
+    And no other errors or warnings are reported
+
+
+
   ### 5.3.3 The id attribute
   
   Scenario: 'id' attributes can have leading or trailing space 
@@ -82,6 +92,7 @@ Feature: EPUB 3 — Package document
     When checking file 'attr-lang-empty-valid.opf'
     Then no other errors or warnings are reported
 
+  @spec @xref:attrdef-xml-lang
   Scenario: the 'xml:lang' language tag must not have leading/trailing whitespace   
     When checking file 'attr-lang-whitespace-error.opf'
     Then error OPF-092 is reported
@@ -274,6 +285,7 @@ Feature: EPUB 3 — Package document
     And the message contains "only one value must be specified"
     And no other errors or warnings are reported
 
+  @spec @xref:sec-meta-elem
   Scenario: a metadata's property name must be well-formed
     When checking file 'metadata-meta-property-malformed-error.opf'
     Then error OPF-026 is reported
@@ -316,12 +328,6 @@ Feature: EPUB 3 — Package document
 
   ### 5.5.7 The link element
   
-  @spec @xref:sec-link-elem
-  Scenario: 'link' target must not reference a manifest ID
-    When checking file 'link-to-publication-resource-error.opf'
-    Then error OPF-067 is reported
-    And no other errors or warnings are reported
-
   Scenario: Report a package metadata link to a missing resource
     When checking EPUB 'package-link-missing-resource-error'
     Then warning RSC-007w is reported
@@ -387,14 +393,101 @@ Feature: EPUB 3 — Package document
     And no other errors or warnings are reported
   
   
-  ### 5.6.2.1 Resource properties
+  ### 5.6.2 The item element
   
+  @spec @xref:sec-item-elem
+  Scenario: a manifest item must declare a media type  
+    When checking file 'item-media-type-missing-error.opf'
+    Then error RSC-005 is reported
+    And the message contains 'missing required attribute "media-type"'
+    And no other errors or warnings are reported
+
+  Scenario: item URLs should not contain spaces, even if properly encoded
+    When checking file 'item-href-contains-spaces-unencoded-error.opf'
+    Then error RSC-020 is reported
+    And warning PKG-010 is reported (side effect of spaces)
+    And no other errors or warnings are reported
+
+  Scenario: item URLs should not contain spaces, even if properly encoded
+    When checking file 'item-href-contains-spaces-warning.opf'
+    Then warning PKG-010 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-elem
+  Scenario: item URLs must not have a fragment identifier
+    When checking file 'item-href-with-fragment-error.opf'
+    Then error OPF-091 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-elem
+  Scenario: two manifest items cannot represent the same resource 
+    When checking file 'item-duplicate-resource-error.opf'
+    Then error OPF-074 is reported
+    And no other errors or warnings are reported
+  
+  @spec @xref:sec-item-elem
+  Scenario: Report duplicate declarations of a resource in the package document manifest
+    When checking EPUB 'package-manifest-duplicate-resource-error'
+    Then error OPF-074 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-elem @xref:sec-container-iri
+  Scenario: Report a resource declared in the package document but missing from the container
+    When checking EPUB 'package-manifest-item-missing-error'
+    Then error RSC-001 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-elem @xref:attrdef-href
+  Scenario: Report a manifest item path with unencoded spaces
+    See issue #239 for why this needs to also be checked at the publication level
+    When checking file 'package-manifest-item-with-spaces-warning'
+    Then warning PKG-010 is reported
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-elem @xref:sec-container-iri
+  Scenario: Report fonts declared in the package document but missing from the container
+    When checking EPUB 'package-manifest-fonts-missing-error'
+    Then error RSC-001 is reported 3 times
+    And no other errors or warnings are reported
+  
+  @spec @xref:sec-item-elem
+  Scenario: fallback attribute must point to an existing item ID 
+    When checking file 'fallback-to-unknown-id-error.opf'
+    Then error RSC-005 is reported
+    And the message contains 'must resolve to another manifest item'
+    And no other errors or warnings are reported
+    
+  @spec @xref:sec-item-elem
+  Scenario: fallback attribute must not reference its item ID 
+    When checking file 'fallback-to-self-error.opf'
+    Then error RSC-005 is reported
+    And the message contains 'must resolve to another manifest item'
+    And no other errors or warnings are reported
+
+  @spec @xref:sec-item-elem
+  Scenario: Report a manifest fallback that references a non-existent resource
+    When checking EPUB 'package-manifest-fallback-non-resolving-error'
+    Then error RSC-005 is reported
+    And the message contains 'manifest item element fallback attribute must resolve to another manifest item'
+    And error MED-003 is reported
+    And no other errors or warnings are reported
+    
+  Scenario: Report usage of the EPUB 2 'fallback-style' attribute
+    When checking file 'fallback-style-error.opf'
+    Then error RSC-005 is reported
+    And the message contains 'fallback-style'
+    And no other errors or warnings are reported
+
+
+  #### 5.6.2.1 Resource properties
+  
+  @spec @xref:sec-item-resource-properties
   Scenario: An unknown item property in the default vocab is reported
     When checking file 'item-property-unknown-error.opf'
     Then error OPF-027 is reported
     And no errors or warnings are reported
   
-  ## cover-image
+  ##### cover-image
   
   @spec @xref:sec-item-resource-properties
   Scenario: The 'cover-image' item property must occur at most once 
@@ -415,14 +508,14 @@ Feature: EPUB 3 — Package document
     Then error OPF-027 is reported
     And no other errors or warnings are reported
 
-  ###  mathml
+  #####  mathml
 
   @spec @xref:sec-item-resource-properties
   Scenario: Verify content documents are identified as containing mathml
     When checking EPUB 'package-mathml-valid'
     Then no errors or warnings are reported    
 
-  ###  remote-resources
+  #####  remote-resources
 
   @spec @xref:sec-item-resource-properties
   Scenario: Report an XHTML document with remote audio but without the `remote-resources` property set in the package document
@@ -472,7 +565,7 @@ Feature: EPUB 3 — Package document
     Then error OPF-014 is reported
     And no other errors or warnings are reported
 
-  ###  scripted
+  #####  scripted
 
   @spec @xref:sec-item-resource-properties
   Scenario: Report the declaration of the `scripted` property when the content has no script
@@ -491,7 +584,7 @@ Feature: EPUB 3 — Package document
     When checking EPUB 'package-manifest-prop-scripted-not-required-for-script-data-block-valid'
     Then no errors or warnings are reported
 
-  ###  svg
+  #####  svg
 
   @spec @xref:sec-item-resource-properties
   Scenario: Report the declaration of the `svg` property when the content has no embedded SVG
@@ -512,7 +605,7 @@ Feature: EPUB 3 — Package document
     And no other errors or warnings are reported
 
 
-  ###  switch
+  #####  switch
 
   @spec @xref:sec-item-resource-properties
   Scenario: Report a content document without the `switch` property declared in the manifest
@@ -523,47 +616,23 @@ Feature: EPUB 3 — Package document
     And no other errors or warnings are reported
 
 
-  #### 5.6.2 The item element
-  
-  Scenario: a manifest item must declare a media type  
-    When checking file 'item-media-type-missing-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'missing required attribute "media-type"'
-    And no other errors or warnings are reported
+  ##### nav
 
-  Scenario: item URLs should not contain spaces, even if properly encoded
-    When checking file 'item-href-contains-spaces-unencoded-error.opf'
-    Then error RSC-020 is reported
-    And warning PKG-010 is reported (side effect of spaces)
-    And no other errors or warnings are reported
-
-  Scenario: item URLs should not contain spaces, even if properly encoded
-    When checking file 'item-href-contains-spaces-warning.opf'
-    Then warning PKG-010 is reported
-    And no other errors or warnings are reported
-
-  Scenario: item URLs must not have a fragment identifier
-    When checking file 'item-href-with-fragment-error.opf'
-    Then error OPF-091 is reported
-    And no other errors or warnings are reported
-
-  Scenario: two manifest items cannot represent the same resource 
-    When checking file 'item-duplicate-resource-error.opf'
-    Then error OPF-074 is reported
-    And no other errors or warnings are reported
-  
+  @spec @xref:sec-item-resource-properties
   Scenario: one item must have the 'nav' property  
     When checking file 'item-nav-missing-error.opf'
     Then error RSC-005 is reported
     And the message contains 'Exactly one manifest item must declare the "nav" property'
     And no other errors or warnings are reported
     
+  @spec @xref:sec-item-resource-properties
   Scenario: at most one item must have the 'nav' property  
     When checking file 'item-nav-multiple-error.opf'
     Then error RSC-005 is reported
     And the message contains 'Exactly one manifest item must declare the "nav" property'
     And no other errors or warnings are reported
     
+  @spec @xref:sec-item-resource-properties
   Scenario: the 'nav' property must be on an XHTML Content Document  
     When checking file 'item-nav-not-xhtml-error.opf'
     Then error RSC-005 is reported
@@ -571,51 +640,8 @@ Feature: EPUB 3 — Package document
     And error OPF-012 is reported ('nav' undefined for 'application/x+dtbncx+xml')
     And no other errors or warnings are reported
 
-  Scenario: Report duplicate declarations of a resource in the package document manifest
-    When checking EPUB 'package-manifest-duplicate-resource-error'
-    Then error OPF-074 is reported
-    And no other errors or warnings are reported
 
-  Scenario: Report a resource declared in the package document but missing from the container
-    When checking EPUB 'package-manifest-item-missing-error'
-    Then error RSC-001 is reported
-    And no other errors or warnings are reported
 
-  Scenario: Report a manifest item path with unencoded spaces
-    See issue #239 for why this needs to also be checked at the publication level
-    When checking file 'package-manifest-item-with-spaces-warning'
-    Then warning PKG-010 is reported
-    And no other errors or warnings are reported
-
-  Scenario: Report fonts declared in the package document but missing from the container
-    When checking EPUB 'package-manifest-fonts-missing-error'
-    Then error RSC-001 is reported 3 times
-    And no other errors or warnings are reported
-  
-  Scenario: fallback attribute must point to an existing item ID 
-    When checking file 'fallback-to-unknown-id-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'must resolve to another manifest item'
-    And no other errors or warnings are reported
-    
-  Scenario: fallback attribute must not reference its item ID 
-    When checking file 'fallback-to-self-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'must resolve to another manifest item'
-    And no other errors or warnings are reported
-
-  Scenario: Report a manifest fallback that references a non-existent resource
-    When checking EPUB 'package-manifest-fallback-non-resolving-error'
-    Then error RSC-005 is reported
-    And the message contains 'manifest item element fallback attribute must resolve to another manifest item'
-    And error MED-003 is reported
-    And no other errors or warnings are reported
-    
-  Scenario: Report usage of the EPUB 2 'fallback-style' attribute
-    When checking file 'fallback-style-error.opf'
-    Then error RSC-005 is reported
-    And the message contains 'fallback-style'
-    And no other errors or warnings are reported
 
   #### 5.6.3 The bindings Element
   
@@ -647,11 +673,13 @@ Feature: EPUB 3 — Package document
     Then warning RSC-017 is reported (since bindings is deprecated)
     And error OPF-046 is reported (to report the duplicate handler)
     And no other errors or warnings are reported
-  
+
+
   ### 5.7 Spine section
   
   #### 5.7.1 The spine element
 
+  @spec @xref:sec-spine-elem
   Scenario: Report a missing spine
     When checking EPUB 'package-spine-missing-error'
     Then the following errors are reported
@@ -659,18 +687,22 @@ Feature: EPUB 3 — Package document
       | RSC-011 | reference to a resource that is not a spine item | # in the Nav Doc
     And no other errors or warnings are reported
 
+
   #### 5.7.2 The itemref element
   
+  @spec @xref:sec-itemref-elem
   Scenario: An SVG Content Document is allowed in the spine 
     When checking file 'spine-item-svg-valid.opf'
     Then no errors or warnings are reported
     
+  @spec @xref:sec-itemref-elem
   Scenario: An unknown 'itemref' ID is reported  
     When checking file 'spine-item-unknown-error.opf'
     Then error OPF-049 is reported (ID not found)
     Then error RSC-005 is reported (schema error)
     And no other errors or warnings are reported
 
+  @spec @xref:sec-itemref-elem
   Scenario: Two spine 'itemref' elements cannot reference the same manifest item  
     When checking file 'spine-item-duplicate-error.opf'
     Then error RSC-005 is reported
@@ -682,24 +714,16 @@ Feature: EPUB 3 — Package document
   
   ### 5.8.1 The collection element
 
+  @spec @xref:sec-collection-elem
   Scenario: a collection role can be an absolute URL
     When checking file 'collection-role-url-valid.opf'
     Then no errors or warnings are reported
 
+  @spec @xref:sec-collection-elem
   Scenario: a collection role must not be an invalid URL
     Spec mismatch: this should be reported as an error 
     When checking file 'collection-role-url-invalid-error.opf'
     Then warning OPF-070 is reported
-    And no other errors or warnings are reported
-
-  Scenario: a collection role URL cannot contain 'idpf.org' in its host 
-    When checking file 'collection-role-url-idpf.org-error.opf'
-    Then error OPF-069 is reported
-    And no other errors or warnings are reported
-
-  Scenario: a collection role must not be an unknown token value
-    When checking file 'collection-role-unknown-error.opf'
-    Then error OPF-068 is reported
     And no other errors or warnings are reported
 
   Scenario: a 'manifest' collection must be the child of another collection
